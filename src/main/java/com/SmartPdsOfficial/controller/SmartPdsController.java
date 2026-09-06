@@ -36,13 +36,13 @@ public class SmartPdsController {
 	private NonVisitedService nonVisitedService;
 	
 	
-	@GetMapping(value = "/smartpds", produces = "text/html")
+	@GetMapping(value = "/", produces = "text/html")
 	public String home() {
 
 	    return smartPdsHome.getHomePage();
 	}
 	
-	@PostMapping(value = "/smartpds", produces = "text/html")
+	@PostMapping(value = "/", produces = "text/html")
 	public String smartPds(
 	        @RequestParam String dist_code,
 	        @RequestParam String fps_id,
