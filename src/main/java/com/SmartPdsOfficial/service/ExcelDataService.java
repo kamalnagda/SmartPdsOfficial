@@ -2,6 +2,7 @@ package com.SmartPdsOfficial.service;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,17 +76,26 @@ public class ExcelDataService {
 
         return cell.getStringCellValue().trim();
     }
-
-    public List<Beneficiary> getBeneficiariesByFpsId(String fpsId) {
+    
+    //for render
+public List<Beneficiary> getBeneficiariesByFpsId(String fpsId) {
 
         List<Beneficiary> beneficiaries = new ArrayList<>();
 
-        try (FileInputStream file = new FileInputStream(filePath);
-             Workbook workbook = new XSSFWorkbook(file)) {
+        try (
+            InputStream file = getClass()
+                    .getClassLoader()
+                    .getResourceAsStream("beneficiaries.xlsx");
+
+            Workbook workbook = new XSSFWorkbook(file)
+        ) {
+
+            if (file == null) {
+                throw new RuntimeException("beneficiaries.xlsx not found!");
+            }
 
             Sheet sheet = workbook.getSheetAt(0);
 
-            // Skip title row and header row
             for (int i = 2; i <= sheet.getLastRowNum(); i++) {
 
                 Row row = sheet.getRow(i);
@@ -95,15 +105,12 @@ public class ExcelDataService {
                 }
 
                 String currentFpsId = getCellValue(row.getCell(1));
-                
-                
 
                 // Only add matching FPS ID
                 if (!currentFpsId.equals(fpsId)) {
-                	
                     continue;
                 }
-         
+
                 Beneficiary beneficiary = new Beneficiary();
 
                 beneficiary.setSn((int) row.getCell(0).getNumericCellValue());
@@ -117,12 +124,68 @@ public class ExcelDataService {
                 beneficiaries.add(beneficiary);
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
+
+            System.err.println("ERROR READING EXCEL:");
             e.printStackTrace();
+
         }
-        System.out.println("Total Coupon : in Excle data service:"+beneficiaries.size());
+
+        System.out.println(
+            "Total Coupon : in Excel data service: " + beneficiaries.size()
+        );
+
         return beneficiaries;
     }
+
+//for local host
+//    public List<Beneficiary> getBeneficiariesByFpsId(String fpsId) {
+//
+//        List<Beneficiary> beneficiaries = new ArrayList<>();
+//
+//        try (FileInputStream file = new FileInputStream(filePath);
+//             Workbook workbook = new XSSFWorkbook(file)) {
+//
+//            Sheet sheet = workbook.getSheetAt(0);
+//
+//            // Skip title row and header row
+//            for (int i = 2; i <= sheet.getLastRowNum(); i++) {
+//
+//                Row row = sheet.getRow(i);
+//
+//                if (row == null) {
+//                    continue;
+//                }
+//
+//                String currentFpsId = getCellValue(row.getCell(1));
+//                
+//                
+//
+//                // Only add matching FPS ID
+//                if (!currentFpsId.equals(fpsId)) {
+//                	
+//                    continue;
+//                }
+//         
+//                Beneficiary beneficiary = new Beneficiary();
+//
+//                beneficiary.setSn((int) row.getCell(0).getNumericCellValue());
+//                beneficiary.setFpsCode(currentFpsId);
+//                beneficiary.setPanchayat(getCellValue(row.getCell(2)));
+//                beneficiary.setVillage(getCellValue(row.getCell(3)));
+//                beneficiary.setFamilyId(getCellValue(row.getCell(4)));
+//                beneficiary.setHeadOfFamily(getCellValue(row.getCell(5)));
+//                beneficiary.setMobile(getCellValue(row.getCell(6)));
+//
+//                beneficiaries.add(beneficiary);
+//            }
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println("Total Coupon : in Excle data service:"+beneficiaries.size());
+//        return beneficiaries;
+//    }
   
     public byte[] createExcelFile(List<Beneficiary> beneficiaries)
             throws IOException {
