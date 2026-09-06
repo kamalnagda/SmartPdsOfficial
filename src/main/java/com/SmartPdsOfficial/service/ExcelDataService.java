@@ -81,20 +81,22 @@ public class ExcelDataService {
 public List<Beneficiary> getBeneficiariesByFpsId(String fpsId) {
 
         List<Beneficiary> beneficiaries = new ArrayList<>();
-
+        System.out.println("1. Starting Excel reading");
         try (
             InputStream file = getClass()
                     .getClassLoader()
                     .getResourceAsStream("beneficiaries.xlsx");
-
+        	
             Workbook workbook = new XSSFWorkbook(file)
         ) {
+        	System.out.println("3. Workbook loaded successfully");
 
             if (file == null) {
                 throw new RuntimeException("beneficiaries.xlsx not found!");
             }
 
             Sheet sheet = workbook.getSheetAt(0);
+            System.out.println("4. Total rows: " + sheet.getLastRowNum());
 
             for (int i = 2; i <= sheet.getLastRowNum(); i++) {
 
