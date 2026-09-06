@@ -81,7 +81,7 @@ public class SmartPdsHome {
 
                         <h1>Smart PDS Official</h1>
 
-                        <form method="post" action="/smartpds">
+                        <form method="post" action="/">
 
                         <label>District Code</label>
                             <input type="text"
