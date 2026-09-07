@@ -78,25 +78,47 @@ public class ExcelDataService {
     }
     
     //for render
-public List<Beneficiary> getBeneficiariesByFpsId(String fpsId) {
+    public List<Beneficiary> getBeneficiariesByFpsId(String fpsId) {
 
         List<Beneficiary> beneficiaries = new ArrayList<>();
+
+        long startTime = System.currentTimeMillis();
+
         System.out.println("1. Starting Excel reading");
-        try (
-            InputStream file = getClass()
-                    .getClassLoader()
+
+        try {
+
+            System.out.println("1.1 Before getting ClassLoader");
+
+            ClassLoader classLoader = getClass().getClassLoader();
+
+            System.out.println("1.2 ClassLoader received");
+
+            System.out.println("1.3 Before getResourceAsStream");
+
+            InputStream file = classLoader
                     .getResourceAsStream("beneficiaries.xlsx");
-        	
-            Workbook workbook = new XSSFWorkbook(file)
-        ) {
-        	System.out.println("3. Workbook loaded successfully");
+
+            System.out.println("1.4 After getResourceAsStream");
 
             if (file == null) {
-                throw new RuntimeException("beneficiaries.xlsx not found!");
+                throw new RuntimeException(
+                        "beneficiaries.xlsx not found!"
+                );
             }
 
+            System.out.println("2. Excel file stream opened");
+
+            System.out.println("2.1 Before XSSFWorkbook");
+
+            Workbook workbook = new XSSFWorkbook(file);
+
+            System.out.println("3. Workbook loaded successfully");
+
             Sheet sheet = workbook.getSheetAt(0);
-            System.out.println("4. Total rows: " + sheet.getLastRowNum());
+
+            System.out.println("4. Total rows: "
+                    + sheet.getLastRowNum());
 
             for (int i = 2; i <= sheet.getLastRowNum(); i++) {
 
@@ -106,25 +128,55 @@ public List<Beneficiary> getBeneficiariesByFpsId(String fpsId) {
                     continue;
                 }
 
-                String currentFpsId = getCellValue(row.getCell(1));
+                String currentFpsId =
+                        getCellValue(row.getCell(1));
 
-                // Only add matching FPS ID
                 if (!currentFpsId.equals(fpsId)) {
                     continue;
                 }
 
                 Beneficiary beneficiary = new Beneficiary();
 
-                beneficiary.setSn((int) row.getCell(0).getNumericCellValue());
+                beneficiary.setSn(
+                        (int) row.getCell(0).getNumericCellValue()
+                );
+
                 beneficiary.setFpsCode(currentFpsId);
-                beneficiary.setPanchayat(getCellValue(row.getCell(2)));
-                beneficiary.setVillage(getCellValue(row.getCell(3)));
-                beneficiary.setFamilyId(getCellValue(row.getCell(4)));
-                beneficiary.setHeadOfFamily(getCellValue(row.getCell(5)));
-                beneficiary.setMobile(getCellValue(row.getCell(6)));
+
+                beneficiary.setPanchayat(
+                        getCellValue(row.getCell(2))
+                );
+
+                beneficiary.setVillage(
+                        getCellValue(row.getCell(3))
+                );
+
+                beneficiary.setFamilyId(
+                        getCellValue(row.getCell(4))
+                );
+
+                beneficiary.setHeadOfFamily(
+                        getCellValue(row.getCell(5))
+                );
+
+                beneficiary.setMobile(
+                        getCellValue(row.getCell(6))
+                );
 
                 beneficiaries.add(beneficiary);
+
+                // Progress log every 5000 rows
+                if (i % 5000 == 0) {
+                    System.out.println(
+                            "Processed rows: " + i
+                    );
+                }
             }
+
+            workbook.close();
+            file.close();
+
+            System.out.println("5. Excel processing completed");
 
         } catch (Exception e) {
 
@@ -133,8 +185,16 @@ public List<Beneficiary> getBeneficiariesByFpsId(String fpsId) {
 
         }
 
+        long endTime = System.currentTimeMillis();
+
         System.out.println(
-            "Total Coupon : in Excel data service: " + beneficiaries.size()
+                "Excel reading time: "
+                        + (endTime - startTime) + " ms"
+        );
+
+        System.out.println(
+                "Total Coupon in Excel data service: "
+                        + beneficiaries.size()
         );
 
         return beneficiaries;
