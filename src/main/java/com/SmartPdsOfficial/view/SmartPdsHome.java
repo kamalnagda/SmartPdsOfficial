@@ -91,7 +91,7 @@ public class SmartPdsHome {
                             <label>FPS ID</label>
                             <input type="text"
                                    name="fps_id"
-                                   required>
+                                   required value="4402083">
 
                             <label>Month</label>
 
